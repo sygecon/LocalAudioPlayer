@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- android:background="?attr/selectableItemBackground" -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	android:padding="2dp"
+	android:gravity="center_vertical"
+	android:background="@drawable/layout_selector"
+    android:clickable="true"
+    android:focusable="true"
+	android:minHeight="?attr/listPreferredItemHeight">
+	
+	<ImageView
+		android:id="@+id/img_play_file"
+		android:layout_width="42dp"
+		android:layout_height="42dp"
+		android:paddingLeft="8dp"
+		android:layout_gravity="start|center"
+		android:contentDescription="Играть"
+		android:background="@android:color/transparent"
+		android:src="@drawable/ic_audio_file" />
+				
+	<TextView
+		android:id="@+id/audio_title"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:paddingLeft="8dp"
+		android:textSize="14sp"
+		android:ellipsize="end"
+		android:maxLines="2"/>
+	
+	<TextView
+		android:id="@+id/audio_duration"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textSize="12sp"
+		android:textColor="@android:color/darker_gray"
+		android:layout_marginStart="8dp"
+		android:paddingRight="8dp"
+		android:minWidth="40dp"
+		android:gravity="end"/>
+		
+</LinearLayout>

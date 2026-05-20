@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+	android:orientation="vertical"
+    tools:context=".MainActivity">
+	<!-- Корневой контейнер, который занимает весь экран -->
+
+	<RelativeLayout 
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="@color/teal_700"
+			android:padding="8dp">
+			
+			<ImageButton
+				android:id="@+id/btn_back"
+				android:layout_gravity="start"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:paddingLeft="8dp"
+				android:contentDescription="Назад"
+				android:background="@android:color/transparent" 
+				android:src="@drawable/ic_back_48" />
+				
+			<TextView
+				android:id="@+id/trackNumber"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Трек 1 из 12"
+				android:layout_gravity="center"
+				android:background="@android:color/transparent"
+				android:textAppearance="?attr/textAppearanceBodyMedium"
+				android:textColor="?android:attr/textColorTertiary"
+				android:textSize="16sp" />
+
+			<ImageButton
+				android:id="@+id/btn_refresh"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_gravity="end"
+				android:paddingRight="8dp"
+				android:contentDescription="Обновить"
+				android:background="@android:color/transparent" 
+				android:src="@android:drawable/ic_menu_rotate" />
+				
+		</androidx.appcompat.widget.Toolbar>
+		
+		<LinearLayout
+			android:id="@+id/loading_container"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/toolbar"
+			android:orientation="vertical"
+			android:gravity="center"
+			android:padding="16dp"
+			android:visibility="gone">
+			
+			<ProgressBar
+				android:id="@+id/progress_bar"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"/>
+			
+			<TextView
+				android:id="@+id/status_text"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:text="Загрузка..."
+				android:textSize="14sp"
+				android:layout_gravity="center"/>
+		</LinearLayout>
+
+		<androidx.recyclerview.widget.RecyclerView
+			android:id="@+id/recycler_view"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_below="@id/toolbar"
+			android:clipToPadding="true"
+			android:paddingLeft="2dp"
+			android:paddingRight="2dp"
+			android:paddingBottom="110dp"
+			app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+		
+		
+				
+		<!-- 6. Ползунок прогресса -->
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:gravity="bottom|center"
+			android:orientation="horizontal"
+			android:paddingLeft="8dp"
+			android:paddingRight="8dp"
+			android:paddingBottom="70dp">
+
+			<!-- Левый текст -->
+			<TextView
+				android:id="@+id/currentTime"
+				android:minWidth="50dp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingLeft="8dp"
+				android:textSize="12sp"
+				android:text="00:00"
+				android:textAlignment="viewStart" />
+
+			<!-- Полоса прокрутки (растягивается) -->
+			<SeekBar
+				android:id="@+id/rangeSeekBar"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:paddingLeft="8dp"
+				android:paddingRight="8dp"
+				android:layout_weight="1" />
+
+			<!-- Правый текст -->
+			<TextView
+				android:id="@+id/totalTime"
+				android:minWidth="50dp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingRight="8dp"
+				android:textSize="12sp"
+				android:text="00:00"
+				android:textAlignment="viewEnd" />
+
+		</LinearLayout>
+		
+			
+		<!-- 5. Панель управления: Назад, Play/Pause, Вперёд -->
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:gravity="bottom|center"
+			android:orientation="horizontal"
+			android:paddingTop="8dp"
+			android:paddingBottom="8dp">
+			
+			<ImageButton
+				android:id="@+id/btnBackward"
+				android:layout_width="50dp"
+				android:layout_height="50dp"
+				android:layout_marginEnd="50dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="Предыдущий"
+				android:src="@drawable/step_backward" />
+
+			<ImageButton
+				android:id="@+id/btnPlayPause"
+				android:layout_width="50dp"
+				android:layout_height="50dp"
+				android:layout_marginEnd="50dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="Воспроизведение / Пауза"
+				android:src="@drawable/play_circle" />
+
+			<ImageButton
+				android:id="@+id/btnForward"
+				android:layout_width="50dp"
+				android:layout_height="50dp"
+				android:background="?attr/selectableItemBackgroundBorderless"
+				android:contentDescription="Следующий"
+				android:src="@drawable/step_forward" />
+				
+		</LinearLayout>
+		
+	</RelativeLayout>
+    
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,16 @@
+<resources>
+
+    <style name="Widget.Theme.АудиоКниги.ActionBar.Fullscreen" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="Widget.Theme.АудиоКниги.ButtonBar.Fullscreen" parent="">
+        <item name="android:background">@color/black_overlay</item>
+        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
+    </style>
+	
+	<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+		<item name="android:listViewStyle">@android:style/Widget.ListView</item>
+		<item name="android:listPreferredItemHeight">?attr/listPreferredItemHeight</item>
+	</style>
+</resources>

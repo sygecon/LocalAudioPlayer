@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- State when the layout is pressed -->
+    <item android:state_pressed="true" android:drawable="@color/selected_item_pressed" />
+	<!-- State when the layout is focused (for D-pad/keyboard) -->
+    <item android:state_focused="true" android:state_pressed="false" android:drawable="@color/colorPrimaryDark" />
+	<!-- Default state -->
+    <item android:drawable="@drawable/item_normal" />
+</selector>
