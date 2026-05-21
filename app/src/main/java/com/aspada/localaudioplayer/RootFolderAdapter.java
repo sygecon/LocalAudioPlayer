@@ -34,14 +34,14 @@ public class RootFolderAdapter extends RecyclerView.Adapter<RootFolderAdapter.Vi
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(android.R.layout.simple_list_item_1, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FolderItem folder = rootFolders.get(position);
         String displayText = folder.getName() + " (" + countTotalFiles(folder) + ")";
         holder.textView.setText(displayText);

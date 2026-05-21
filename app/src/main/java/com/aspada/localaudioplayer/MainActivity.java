@@ -224,10 +224,10 @@ public class MainActivity extends AppCompatActivity {
         controllerFuture.addListener(() -> {
             try {
                 mediaController = controllerFuture.get();
-                if (mpActiveIndex > -1 && mediaController.getCurrentMediaItem() != null) {
-                    if (mpActiveIndex >= mediaController.getMediaItemCount()) {
-                        mpActiveIndex = 0;
-                    }
+                int count = mediaController.getMediaItemCount();
+
+                if (mpActiveIndex > -1 && mediaController.getCurrentMediaItem() != null && count > 0) {
+                    if (mpActiveIndex >= count) mpActiveIndex = 0;
                     seekToTrack(mpPosition);
                 } else {
                     setupControls();
@@ -408,12 +408,9 @@ public class MainActivity extends AppCompatActivity {
         mediaController.seekTo(mpActiveIndex, mpPosition);
         mediaController.play();
 
-        if (! curFolderIsRoot && ! curFolderPath.isEmpty() && mpActiveIndex > -1) {
-            new Thread(() -> {
-                stateManager.saveMarkHistoryTrack(mpActiveIndex);
-                stateManager.saveMarkHistoryPosition((int) mpPosition);
-            }).start();
-        }
+//        if (! curFolderIsRoot && ! curFolderPath.isEmpty() && mpActiveIndex > -1) {
+//            new Thread(() -> stateManager.saveMarkHistoryTrack(mpActiveIndex)).start();
+//        }
     }
 
     private void playFolder(int startPosition) {
@@ -441,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
      * Создаёт новый плейлист для другой папки
      */
     private void createNewPlaylist(List<AudioItem> audioFiles) {
-        mpActiveIndex = 0;
+        mpActiveIndex = -1;
         mpPosition    = 0;
         mpTrackCount  = 0;
         if (audioFiles == null) return;
@@ -465,38 +462,39 @@ public class MainActivity extends AppCompatActivity {
         mpTrackCount = items.size();
 
         if (mpTrackCount > 0) {
-            boolean isOpen = false;
 
-            if (! curFolderPath.isEmpty()) {
-                Log.e("PlaybackState", "OpenPlayList-" + curFolderPath);
+            if (! curFolderPath.isEmpty() && stateManager != null) {
+                int numTrack = stateManager.getMarkHistoryTrack();
+                if (numTrack > -1) mpActiveIndex = numTrack;
+
                 PlaybackState savedState = stateManager.getState(curFolderPath);
-
                 if (savedState != null) {
-                    int trackIndex = savedState.getTrackIndex();
+                    numTrack = savedState.getTrackIndex();
                     // Проверяем, что индекс в пределах нового плейлиста
-                    if (trackIndex > -1 && trackIndex < mpTrackCount) {
-                        mpPosition = savedState.getPositionMs();
-                        mpActiveIndex = trackIndex;
-
-                        mediaController.setMediaItems(items, mpActiveIndex, mpPosition);
-                        mediaController.prepare();
-                        mediaController.play();
-                        isOpen = true;
+                    if (numTrack > -1 && numTrack < mpTrackCount) {
+                        if (mpActiveIndex == numTrack || mpActiveIndex == -1) {
+                            mpPosition = savedState.getPositionMs();
+                            mpActiveIndex = numTrack;
+                        }
                     }
                 }
-            }
-
-            if (! isOpen) {
-                mediaController.setMediaItems(items);
-                mediaController.prepare();
             }
 
             if (! curFolderPath.isEmpty() && mpActiveIndex > -1) {
                 new Thread(() -> {
                     stateManager.saveMarkHistoryPath(curFolderPath);
                     stateManager.saveMarkHistoryTrack(mpActiveIndex);
-                    stateManager.saveMarkHistoryPosition((int) mpPosition);
+                    stateManager.saveState(curFolderPath, mpActiveIndex, mpPosition);
                 }).start();
+            }
+
+            if (mpActiveIndex > -1) {
+                mediaController.setMediaItems(items, mpActiveIndex, mpPosition);
+                mediaController.prepare();
+                mediaController.play();
+            } else {
+                mediaController.setMediaItems(items);
+                mediaController.prepare();
             }
         }
     }
@@ -569,7 +567,8 @@ public class MainActivity extends AppCompatActivity {
             if (! currentFolders.isEmpty()) currentFolders.clear();
             currentFolders = null;
         }
-        currentAdapter      = null;
+        currentAdapter = null;
+        stateManager   = null;
 
         super.onDestroy();
     }
@@ -628,7 +627,13 @@ public class MainActivity extends AppCompatActivity {
             public void onPlaybackStateChanged(int state) {
 //                      Player.STATE_IDLE , Player.STATE_BUFFERING , Player.STATE_READY
                 if (state == Player.STATE_ENDED) {
-                    saveCurrentPlaybackState();
+                    new Thread(() -> {
+                        if (! curFolderPath.isEmpty()) {
+                            stateManager.removeState(curFolderPath);
+                        }
+                        stateManager.clearHistory();
+                    }).start();
+
                     mpPosition = 0;
                 }
             }
@@ -656,11 +661,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (mediaController != null) {
             long currentPosition = mediaController.getCurrentPosition();
-            stateManager.saveState(curFolderPath, mpActiveIndex, currentPosition);
 
             new Thread(() -> {
+                stateManager.saveState(curFolderPath, mpActiveIndex, currentPosition);
                 stateManager.saveMarkHistoryTrack(mpActiveIndex);
-                stateManager.saveMarkHistoryPosition((int) currentPosition);
             }).start();
         }
     }
@@ -670,11 +674,7 @@ public class MainActivity extends AppCompatActivity {
 
             int indexInAdapter = curCountSubFolders + audioIndexInFolder;
             currentAdapter.setPlayingPosition(indexInAdapter);
-
-            new Thread(() -> {
-                stateManager.saveMarkHistoryTrack(mpActiveIndex);
-                stateManager.saveMarkHistoryPosition(0);
-            }).start();
+            saveCurrentPlaybackState();
         }
     }
 
@@ -687,25 +687,45 @@ public class MainActivity extends AppCompatActivity {
         if (currentFolders.isEmpty()) return;
         if (mediaController == null) return;
 
-        String folderPath = stateManager.getMarkHistoryPath();
+        String folderPath = "";
+        int track = 0;
+        if (stateManager != null) {
+            folderPath = stateManager.getMarkHistoryPath();
+            track = stateManager.getMarkHistoryTrack();
+            if (track < 0) track = 0;
+        }
         if (folderPath.isEmpty()) return;
 
         FolderItem found = findFolderByPath(currentFolders, folderPath);
-
         if (found != null) {
             // Показываем содержимое найденной папки
             showSubFolder(found);
 
-            int track = stateManager.getMarkHistoryTrack();
-            if (mediaController.getMediaItemCount() > track) {
-                long pos = stateManager.getMarkHistoryPosition();
-                mpActiveIndex = track;
+            long pos = 0;
+            mpActiveIndex = track;
+            PlaybackState savedState = stateManager.getState(folderPath);
+
+            if (savedState != null) {
+                int numTrack = savedState.getTrackIndex();
+                if (numTrack == mpActiveIndex) {
+                    pos = savedState.getPositionMs();
+                }
+            }
+
+            if (! curFolderPath.isEmpty()) {
+                new Thread(() -> {
+                    stateManager.saveMarkHistoryPath(curFolderPath);
+                    stateManager.saveMarkHistoryTrack(mpActiveIndex);
+                }).start();
 
                 seekToTrack(pos);
             }
         } else {
             // Опционально: сообщить пользователю
             Toast.makeText(this, "Папка не найдена: " + folderPath, Toast.LENGTH_SHORT).show();
+            if (stateManager != null) {
+                stateManager.clearHistory();
+            }
         }
     }
 

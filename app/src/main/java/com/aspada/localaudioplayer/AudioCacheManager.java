@@ -20,7 +20,7 @@ import java.util.List;
 public class AudioCacheManager {
 
     private static final String CACHE_FILE = "audio_cache.json";
-    private static final long CACHE_VALID_DURATION = 24 * 60 * 60 * 1000; // 24 часа
+    private static final long CACHE_VALID_DURATION = 24 * 3600000 * 24; // 24 часа * 24 дня
 
     private final Context context;
     private final Gson gson;

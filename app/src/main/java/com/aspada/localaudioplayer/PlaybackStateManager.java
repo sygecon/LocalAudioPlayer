@@ -22,7 +22,6 @@ public class PlaybackStateManager {
 
     private static final String KEY_HISTORY_PATH = "listened_path";
     private static final String KEY_HISTORY_TRACK = "listened_track";
-    private static final String KEY_HISTORY_POSITION = "listened_position";
 
     private static final int MAX_STATES     = 30;
 
@@ -154,16 +153,7 @@ public class PlaybackStateManager {
     }
 
     public int getMarkHistoryTrack() {
-        return prefs.getInt(KEY_HISTORY_TRACK, 0);
-    }
-
-    // Position
-    public void saveMarkHistoryPosition(int pos) {
-        prefs.edit().putInt(KEY_HISTORY_POSITION, pos).apply();
-    }
-
-    public int getMarkHistoryPosition() {
-        return prefs.getInt(KEY_HISTORY_POSITION, 0);
+        return prefs.getInt(KEY_HISTORY_TRACK, -1);
     }
 
     //  Clear History
@@ -171,7 +161,6 @@ public class PlaybackStateManager {
         prefs.edit()
             .remove(KEY_HISTORY_PATH)
             .remove(KEY_HISTORY_TRACK)
-            .remove(KEY_HISTORY_POSITION)
             .apply();
     }
 }
