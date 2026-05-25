@@ -9,6 +9,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +22,26 @@ import java.util.concurrent.Executors;
 public class PlaybackStateManager {
     private static final String PREF_NAME   = "melap_playback_states";
     private static final String KEY_STATES  = "states";
-
-    private static final String KEY_HISTORY_PATH = "listened_path";
-    private static final String KEY_HISTORY_TRACK = "listened_track";
-
     private static final int MAX_STATES     = 30;
+
+    public static class State {
+        public int trackIndex;
+        public long positionMs;
+        public long timestamp;
+        public String folderPath;   // полный путь к папке
+
+        public State(String folderPath, int trackIndex, long positionMs) {
+            this.folderPath = folderPath;
+            this.trackIndex = trackIndex;
+            this.positionMs = positionMs;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
 
     private final SharedPreferences prefs;
     private final Gson gson = new Gson();
-    private final Map<String, PlaybackState> cache = new ConcurrentHashMap<>();
+    private final Map<String, State> cache = new ConcurrentHashMap<>();
+
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
 
     public PlaybackStateManager(Context context) {
@@ -41,8 +55,8 @@ public class PlaybackStateManager {
     private void loadStates() {
         String json = prefs.getString(KEY_STATES, "{}");
         try {
-            Type type = new TypeToken<Map<String, PlaybackState>>(){}.getType();
-            Map<String, PlaybackState> loaded = gson.fromJson(json, type);
+            Type type = new TypeToken<Map<String, State>>(){}.getType();
+            Map<String, State> loaded = gson.fromJson(json, type);
             if (loaded != null) {
                 cache.putAll(loaded);
                 // На всякий случай обрезаем, если вдруг оказалось больше лимита
@@ -61,8 +75,9 @@ public class PlaybackStateManager {
      */
     public void saveState(String folderId, int trackIndex, long positionMs) {
         if (folderId.isEmpty()) return;
-        String key = AppUtils.generateKeyFromUrl(folderId);
-        cache.put(key, new PlaybackState(trackIndex, positionMs));
+        if (trackIndex < 0) return;
+        String key = generateKeyFromUrl(folderId);
+        cache.put(key, new State(folderId, trackIndex, positionMs));
 
         if (cache.size() > MAX_STATES) {
             trimCache();
@@ -74,8 +89,8 @@ public class PlaybackStateManager {
      * Получает состояние для папки (из кэша).
      */
     @Nullable
-    public PlaybackState getState(String folderId) {
-        String key = AppUtils.generateKeyFromUrl(folderId);
+    public State getState(String folderId) {
+        String key = generateKeyFromUrl(folderId);
         return cache.get(key);
     }
 
@@ -84,20 +99,41 @@ public class PlaybackStateManager {
      */
     public void removeState(String folderId) {
         if (folderId.isEmpty()) return;
-        String key = AppUtils.generateKeyFromUrl(folderId);
+        String key = generateKeyFromUrl(folderId);
         if (cache.remove(key) != null) {
             persistCacheAsync();
         }
     }
 
     /**
+     * Возвращает список последних открытых папок (макс. maxCount),
+     * отсортированных по времени последнего воспроизведения (сначала новые).
+     * Включаются только записи с непустым folderPath.
+     */
+    public List<State> getRecentFolders(int maxCount) {
+        List<State> result = new ArrayList<>();
+        for (State state : cache.values()) {
+            String folderPath = state.folderPath;
+            if (folderPath != null && !folderPath.isEmpty()) {
+                result.add(state);
+            }
+        }
+        // Сортировка по убыванию timestamp
+        result.sort((a, b) -> Long.compare(b.timestamp, a.timestamp));
+        if (result.size() > maxCount) {
+            result = result.subList(0, maxCount);
+        }
+        return result;
+    }
+
+    /**
      * Удаляет самые старые записи, оставляя только MAX_STATES.
      */
     private void trimCache() {
-        List<Map.Entry<String, PlaybackState>> entries = new ArrayList<>(cache.entrySet());
+        List<Map.Entry<String, State>> entries = new ArrayList<>(cache.entrySet());
         // Сортируем по timestamp: новые – выше, старые – ниже
         entries.sort(
-                (a, b) -> Long.compare(b.getValue().getTimestamp(), a.getValue().getTimestamp()));
+                (a, b) -> Long.compare(b.getValue().timestamp, a.getValue().timestamp));
         while (entries.size() > MAX_STATES) {
             cache.remove(entries.remove(entries.size() - 1).getKey());
         }
@@ -108,7 +144,7 @@ public class PlaybackStateManager {
      */
     private void persistCacheAsync() {
         // Копируем данные для фона, чтобы избежать ConcurrentModification
-        final Map<String, PlaybackState> snapshot = new ConcurrentHashMap<>(cache);
+        final Map<String, State> snapshot = new ConcurrentHashMap<>(cache);
         saveExecutor.execute(() -> {
             String json = gson.toJson(snapshot);
             prefs.edit().putString(KEY_STATES, json).apply();
@@ -125,42 +161,64 @@ public class PlaybackStateManager {
 
     // Пройти по кэшу и удалить папки, которых больше нет на устройстве
     public void cleanupOldStates() {
-        for (String folderId : cache.keySet()) {
-            File folder = new File(folderId);
+        if (cache.isEmpty()) return;
+        boolean isRemove = false;
+
+        for (State state : cache.values()) {
+            File folder = new File(state.folderPath);
             if (!folder.exists()) {
-                if (cache.remove(folderId) != null) {
-                    persistCacheAsync();
+                String key = generateKeyFromUrl(state.folderPath);
+                if (cache.remove(key) != null) {
+                    isRemove = true;
+
                 }
             }
+        }
+
+        if (isRemove) {
+            persistCacheAsync();
         }
     }
 
     /**
-     * HISTORY LISTENED
+     * Возвращает состояние с самым большим timestamp (последнее сохранённое)
+     * или null, если кэш пуст.
      */
-    // Current Folder Path
-    public void saveMarkHistoryPath(String path) {
-        prefs.edit().putString(KEY_HISTORY_PATH, path).apply();
+    @Nullable
+    public State getLastPlayedState() {
+        if (cache.isEmpty()) return null;
+        State last = null;
+        long maxTimestamp = Long.MIN_VALUE;
+
+        for (State state : cache.values()) {
+            long tms = state.timestamp;
+            if (tms > maxTimestamp) {
+                maxTimestamp = tms;
+                last = state;
+            }
+        }
+        return last;
     }
 
-    public String getMarkHistoryPath() {
-        return prefs.getString(KEY_HISTORY_PATH, "");
-    }
-
-    // Track number
-    public void saveMarkHistoryTrack(int numTrack) {
-        prefs.edit().putInt(KEY_HISTORY_TRACK, numTrack).apply();
-    }
-
-    public int getMarkHistoryTrack() {
-        return prefs.getInt(KEY_HISTORY_TRACK, -1);
-    }
-
-    //  Clear History
-    public void clearHistory() {
-        prefs.edit()
-            .remove(KEY_HISTORY_PATH)
-            .remove(KEY_HISTORY_TRACK)
-            .apply();
+    /**
+     * Вместо самого URL лучшим решением является использование его хэш-суммы
+     * @return String
+     */
+    private static String generateKeyFromUrl(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            // Берём первые 16 символов (64 бита) – вероятность коллизии ничтожна
+            return hexString.substring(0, 16);
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 обязателен на Android, но на всякий случай fallback
+            return String.valueOf(input.hashCode());
+        }
     }
 }

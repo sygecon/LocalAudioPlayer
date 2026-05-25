@@ -47,7 +47,6 @@ public class AudioPlaybackService extends MediaSessionService
             @Override
             public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
                 // обновляем уведомление, панель и т.д.
-
                 if (playWhenReady) {
                     // началось воспроизведение
                     registerPhoneCallReceiver();
@@ -56,7 +55,6 @@ public class AudioPlaybackService extends MediaSessionService
                     unRegisterPhoneCallReceiver();
                 }
             }
-
         });
     }
 

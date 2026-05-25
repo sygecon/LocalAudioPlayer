@@ -5,6 +5,19 @@ import java.util.List;
 
 // Папка (может быть корневой или подпапкой)
 public class FolderItem {
+
+    public static class AudioItem {
+        public String path;
+        public String title;
+        public long duration;
+
+        public AudioItem(String path, String fileName, long duration) {
+            this.path     = path;
+            this.title    = AppUtils.removeExtension(fileName);
+            this.duration = duration;
+        }
+    }
+
     private final String name;
     private final String path;
     private final boolean isRoot;

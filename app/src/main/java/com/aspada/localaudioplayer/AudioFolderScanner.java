@@ -135,7 +135,7 @@ public class AudioFolderScanner {
             String url = Uri.fromFile(audioFile).toString();
             long duration = getAudioDuration(audioFile);
 
-            folderItem.addFiles(new AudioItem(url, audioFile.getName(), duration
+            folderItem.addFiles(new FolderItem.AudioItem(url, audioFile.getName(), duration
 //                    , audioFile.length(), audioFile.lastModified()
             ));
         }

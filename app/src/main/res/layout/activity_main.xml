@@ -25,17 +25,29 @@
 				android:layout_gravity="start"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
-				android:paddingLeft="8dp"
-				android:contentDescription="Назад"
+				android:contentDescription="Домой"
 				android:background="@android:color/transparent" 
-				android:src="@drawable/ic_back_48" />
+				android:src="@drawable/home_silver_42" />
+				
+			<ImageButton
+				android:id="@+id/btn_journal"
+				android:layout_gravity="start"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:paddingLeft="8dp"
+				android:contentDescription="Журнал"
+				android:background="@android:color/transparent" 
+				android:src="@drawable/history_clock_gray_42" />
 				
 			<TextView
 				android:id="@+id/trackNumber"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:paddingLeft="8dp"
+				android:paddingRight="8dp"
 				android:text="Трек 1 из 12"
 				android:layout_gravity="center"
+				android:layout_weight="1"
 				android:background="@android:color/transparent"
 				android:textAppearance="?attr/textAppearanceBodyMedium"
 				android:textColor="?android:attr/textColorTertiary"
@@ -46,7 +58,6 @@
 				android:layout_width="48dp"
 				android:layout_height="48dp"
 				android:layout_gravity="end"
-				android:paddingRight="8dp"
 				android:contentDescription="Обновить"
 				android:background="@android:color/transparent" 
 				android:src="@android:drawable/ic_menu_rotate" />

@@ -55,7 +55,7 @@ public class RootFolderAdapter extends RecyclerView.Adapter<RootFolderAdapter.Vi
 
     private int countTotalFiles(FolderItem folder) {
         if (folder == null) return 0;
-        List<AudioItem> curFiles = folder.getFiles();
+        List<FolderItem.AudioItem> curFiles = folder.getFiles();
         int count = curFiles != null ? curFiles.size() : 0;
 
         List<FolderItem> curFolders = folder.getFolders();

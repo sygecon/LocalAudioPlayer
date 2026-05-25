@@ -24,7 +24,7 @@ public class SubFolderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public interface OnItemClickListener {
         void onFolderClick(FolderItem folder);
-        void onAudioClick(AudioItem audio, int position, List<AudioItem> allAudioInFolder);
+        void onAudioClick(FolderItem.AudioItem audio, int position, List<FolderItem.AudioItem> allAudioInFolder);
     }
 
     public SubFolderAdapter(FolderItem folder, OnItemClickListener listener) {
@@ -42,9 +42,9 @@ public class SubFolderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 }
             }
             // Потом аудиофайлы
-            List<AudioItem> curFiles = folder.getFiles();
+            List<FolderItem.AudioItem> curFiles = folder.getFiles();
             if (curFiles != null && ! curFiles.isEmpty()) {
-                for (AudioItem audio : curFiles) {
+                for (FolderItem.AudioItem audio : curFiles) {
                     if (audio != null) {
                         items.add(audio);
                     }
@@ -94,7 +94,7 @@ public class SubFolderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             txt = "📁 " + (folder.getName());
             fh.nameText.setText(txt);
 
-            List<AudioItem> curFiles = folder.getFiles();
+            List<FolderItem.AudioItem> curFiles = folder.getFiles();
             int count = curFiles != null ? curFiles.size() : 0;
             txt = count + " файлов";
             fh.countText.setText(txt);
@@ -103,13 +103,13 @@ public class SubFolderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 if (listener != null) listener.onFolderClick(folder);
             });
         } else
-        if (holder instanceof AudioViewHolder && item instanceof AudioItem) {
+        if (holder instanceof AudioViewHolder && item instanceof FolderItem.AudioItem) {
 
-            AudioItem audio = (AudioItem) item;
+            FolderItem.AudioItem audio = (FolderItem.AudioItem) item;
             AudioViewHolder ah = (AudioViewHolder) holder;
 
-            ah.titleText.setText(audio.getTitle());
-            ah.durationText.setText(AppUtils.formatDuration(audio.getDuration()));
+            ah.titleText.setText(audio.title);
+            ah.durationText.setText(AppUtils.formatDuration(audio.duration));
             // Устанавливаем состояние активации: true, если этот элемент играет
             ah.itemView.setActivated(position == playingPosition);
 
@@ -127,11 +127,11 @@ public class SubFolderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             ah.itemView.setOnClickListener(v -> {
 
                 if (listener != null) {
-                    List<AudioItem> folderAudio = new ArrayList<>();
+                    List<FolderItem.AudioItem> folderAudio = new ArrayList<>();
 
                     for (Object obj : items) {
-                        if (obj instanceof AudioItem) {
-                            folderAudio.add((AudioItem) obj);
+                        if (obj instanceof FolderItem.AudioItem) {
+                            folderAudio.add((FolderItem.AudioItem) obj);
                             v.setSelected(true);
                         }
                     }

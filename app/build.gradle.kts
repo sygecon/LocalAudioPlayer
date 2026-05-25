@@ -38,6 +38,8 @@ android {
 
 dependencies {
     implementation(libs.activity.ktx)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.datastore.preferences.core)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
@@ -47,6 +49,8 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.10.1")
     implementation("androidx.activity:activity:1.13.0")
     implementation("com.google.code.gson:gson:2.14.0")
+//    implementation("androidx.datastore:datastore-preferences-guava:1.1.1")
+//    implementation("com.google.guava:guava:33.6.0-jre")
 //    implementation(libs.media3.session)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
