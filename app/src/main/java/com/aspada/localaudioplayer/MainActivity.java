@@ -623,19 +623,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
                 mpPosition = 0;
+                int index  = 0;
                 // Обновляем текущий индекс
-                assert mediaItem != null;
-                int index = Integer.parseInt(mediaItem.mediaId);// mediaController.getCurrentMediaItemIndex();
+                if (mediaItem != null) {
+                    index = Integer.parseInt(mediaItem.mediaId);// mediaController.getCurrentMediaItemIndex();
 
-                if (index > -1 && index < mediaController.getMediaItemCount()) {
-                    mpActiveIndex = index;
-                    // Обновляем выделение в адаптере
-                    updateAdapterPlayingPosition(mpActiveIndex);
-
-                    if (stateManager != null && !curFolderPath.isEmpty()) {
-                        stateManager.saveState(curFolderPath, mpActiveIndex, mpPosition);
+                    if (index > -1 && index < mediaController.getMediaItemCount()) {
+                        if (stateManager != null && !curFolderPath.isEmpty()) {
+                            stateManager.saveState(curFolderPath, index, mpPosition);
+                        }
                     }
+                } else {
+                    mediaController.stop();
                 }
+                mpActiveIndex = index;
+                // Обновляем выделение в адаптере
+                updateAdapterPlayingPosition(mpActiveIndex);
             }
 
             @Override

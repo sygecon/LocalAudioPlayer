@@ -45,7 +45,7 @@
 				android:layout_height="wrap_content"
 				android:paddingLeft="8dp"
 				android:paddingRight="8dp"
-				android:text="Трек 1 из 12"
+				android:text="Трек 0"
 				android:layout_gravity="center"
 				android:layout_weight="1"
 				android:background="@android:color/transparent"
@@ -57,10 +57,11 @@
 				android:id="@+id/btn_refresh"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
+				android:paddingRight="8dp"
 				android:layout_gravity="end"
 				android:background="@android:color/transparent"
 				android:contentDescription="Обновить"
-				android:src="@drawable/media3_icon_sync" />
+				android:src="@drawable/ic_repeat" />
 				
 		</androidx.appcompat.widget.Toolbar>
 		
@@ -98,10 +99,8 @@
 			android:clipToPadding="true"
 			android:paddingLeft="2dp"
 			android:paddingRight="2dp"
-			android:paddingBottom="110dp"
+			android:paddingBottom="120dp"
 			app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-		
-		
 				
 		<!-- 6. Ползунок прогресса -->
 		<LinearLayout
@@ -109,9 +108,10 @@
 			android:layout_height="match_parent"
 			android:gravity="bottom|center"
 			android:orientation="horizontal"
+			android:background="@android:color/transparent"
 			android:paddingLeft="8dp"
 			android:paddingRight="8dp"
-			android:paddingBottom="70dp">
+			android:paddingBottom="75dp">
 
 			<!-- Левый текст -->
 			<TextView
@@ -145,7 +145,6 @@
 				android:textAlignment="viewEnd" />
 
 		</LinearLayout>
-		
 			
 		<!-- 5. Панель управления: Назад, Play/Pause, Вперёд -->
 		<LinearLayout

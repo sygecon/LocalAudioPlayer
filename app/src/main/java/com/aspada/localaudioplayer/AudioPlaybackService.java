@@ -70,27 +70,27 @@ public class AudioPlaybackService extends MediaSessionService
     private BroadcastReceiver PhoneCallReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             if (Objects.equals(intent.getAction(), TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-                assert state != null;
 
-                if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
-                    // Телефон звонит - поставить на паузу
-                    if (mediaSession.getPlayer().isPlaying()) {
-                        mediaSession.getPlayer().setPlayWhenReady(false);
-                    }
-                } else
-                if (state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
-                    // Звонок принят - поставить на паузу
-                    if (mediaSession.getPlayer().isPlaying()) {
-                        mediaSession.getPlayer().setPlayWhenReady(false);
-                    }
-                } else
-                if (state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
-                    // Звонок завершен - можно возобновить
-                    if (! mediaSession.getPlayer().isPlaying() && mediaSession.getPlayer().getCurrentMediaItem() != null) {
-                        mediaSession.getPlayer().setPlayWhenReady(true);
+                if (state != null) {
+                    if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                        // Телефон звонит - поставить на паузу
+                        if (mediaSession.getPlayer().isPlaying()) {
+                            mediaSession.getPlayer().setPlayWhenReady(false);
+                        }
+                    } else
+                    if (state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                        // Звонок принят - поставить на паузу
+                        if (mediaSession.getPlayer().isPlaying()) {
+                            mediaSession.getPlayer().setPlayWhenReady(false);
+                        }
+                    } else
+                    if (state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                        // Звонок завершен - можно возобновить
+                        if (! mediaSession.getPlayer().isPlaying() && mediaSession.getPlayer().getCurrentMediaItem() != null) {
+                            mediaSession.getPlayer().setPlayWhenReady(true);
+                        }
                     }
                 }
             }
@@ -98,7 +98,6 @@ public class AudioPlaybackService extends MediaSessionService
     };
 
     private void registerPhoneCallReceiver() {
-        // register after getting audio focus
         IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         registerReceiver(PhoneCallReceiver, filter);

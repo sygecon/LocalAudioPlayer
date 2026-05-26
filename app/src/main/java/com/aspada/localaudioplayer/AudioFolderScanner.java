@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AudioFolderScanner {
-    // Целевые папки
+    // Корневые папки
     private static final String[] targetFolders = {
             "Music", "Downloads", "Audiobooks", "Podcasts"
     };
