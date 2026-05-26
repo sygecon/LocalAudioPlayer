@@ -152,7 +152,7 @@ public class PlaybackStateManager {
     }
 
     /**
-     * Необязательно: синхронное сохранение (если нужно в onDestroy).
+     * Синхронное сохранение (если нужно в onDestroy).
      */
     public void saveNow() {
         String json = gson.toJson(cache);
@@ -181,8 +181,7 @@ public class PlaybackStateManager {
     }
 
     /**
-     * Возвращает состояние с самым большим timestamp (последнее сохранённое)
-     * или null, если кэш пуст.
+     * Возвращает состояние с самым большим timestamp (последнее сохранённое) или null, если кэш пуст.
      */
     @Nullable
     public State getLastPlayedState() {
@@ -201,8 +200,7 @@ public class PlaybackStateManager {
     }
 
     /**
-     * Вместо самого URL лучшим решением является использование его хэш-суммы
-     * @return String
+     * Вместо самого URL используем его хэш
      */
     private static String generateKeyFromUrl(String input) {
         try {

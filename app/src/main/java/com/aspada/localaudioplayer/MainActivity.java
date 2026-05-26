@@ -193,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
                     goToPrevious();
                 } else {
                     Toast.makeText(MainActivity.this, "Закрываем", Toast.LENGTH_SHORT).show();
-                    // Чтобы закрыть Activity при необходимости:
                     setEnabled(false); // Отключаем colback, чтобы не зациклить
                     finish();
                     //getOnBackPressedDispatcher().onBackPressed();
@@ -226,8 +225,8 @@ public class MainActivity extends AppCompatActivity {
                 isUserSeeking = false;
             }
         });
-        // Create the callback
-        // Создаем токен для связи с вашим сервисом
+
+        // Создаем токен для связи с сервисом
         SessionToken sessionToken = new SessionToken(this, new ComponentName(this, AudioPlaybackService.class));
 
         // Строим контроллер
@@ -244,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                     mediaController.seekTo(mpPosition);
                 } else {
                     setupControls();
-                    // Плеер сам свяжет кнопки из XML с логикой mediaController
+                    // Плеер свяжет кнопки с логикой mediaController
                     //binding.playerView.setPlayer(mediaController);
                     // Загружаем данные
                     loadAudioData();
@@ -358,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
                 if (! path.equalsIgnoreCase(curFolderPath)) {
                     previousFolderPath = curFolderPath;
                     curFolderPath = path;
-                    // Создаём плейлист для ExoPlayer
+                    // Создаём плейлист
                     createNewPlaylist(folder.getFiles());
                 } else {
                     setAudioStatPosition(true);
@@ -371,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 previousFolderPath = "";
                 curFolderPath = path;
-                // Создаём плейлист для ExoPlayer
+                // Создаём плейлист
                 createNewPlaylist(folder.getFiles());
             }
         } else {
@@ -383,7 +382,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (! path.isEmpty()) {
                     curFolderPath = path;
-                    // Создаём плейлист для ExoPlayer
+                    // Создаём плейлист
                     createNewPlaylist(folder.getFiles());
                 }
             }
@@ -460,7 +459,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Просто переключается на трек в текущем плейлисте
+     * Переключается на трек в текущем плейлисте
      */
     private void seekToTrack(long position) {
         if (mpTrackCount < 1) return;
@@ -478,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Создаёт новый плейлист для другой папки
+     * Создаёт новый плейлист для папки
      */
     private void createNewPlaylist(List<FolderItem.AudioItem> audioFiles) {
         mpActiveIndex = -1;
@@ -534,10 +533,6 @@ public class MainActivity extends AppCompatActivity {
             .build();
     }
 
-    /**
-     * Универсальный метод проверки по URL первого трека
-     */
-
     private void showLoading(String message) {
         progressBar.setVisibility(View.VISIBLE);
         statusText.setVisibility(View.VISIBLE);
@@ -559,6 +554,13 @@ public class MainActivity extends AppCompatActivity {
                 saveCurrentPlaybackState();
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Небольшая задержка, чтобы макет перестроился
+        recyclerView.post(this::scrollToActiveItem);
     }
 
     @Override
@@ -699,6 +701,8 @@ public class MainActivity extends AppCompatActivity {
             int indexInAdapter = curCountSubFolders + audioIndexInFolder;
             currentAdapter.setPlayingPosition(indexInAdapter);
             UpdateUI();
+            // Прокручиваем к активному элементу
+            scrollToActiveItem();
         }
     }
 
@@ -834,8 +838,19 @@ public class MainActivity extends AppCompatActivity {
             File folder = new File(folderPath);
             if (folder.exists() && folder.isDirectory()) {
                 navigateToFolderByPath(folderPath);
-                // В createNewPlaylist() уже используется getState() для этой папки,
-                // поэтому трек и позиция восстановятся автоматически.
+            }
+        }
+    }
+
+    private void scrollToActiveItem() {
+        if (!(recyclerView.getAdapter() instanceof SubFolderAdapter)) return;
+        SubFolderAdapter adapter = (SubFolderAdapter) recyclerView.getAdapter();
+        int position = adapter.getPlayingPosition();
+        if (position != RecyclerView.NO_POSITION) {
+            // Плавная прокрутка с небольшим смещением, чтобы элемент был в верхней трети экрана
+            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+            if (layoutManager != null) {
+                layoutManager.scrollToPositionWithOffset(position, recyclerView.getHeight() / 4);
             }
         }
     }

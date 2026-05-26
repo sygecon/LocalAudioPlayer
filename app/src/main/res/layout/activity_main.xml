@@ -58,9 +58,9 @@
 				android:layout_width="48dp"
 				android:layout_height="48dp"
 				android:layout_gravity="end"
+				android:background="@android:color/transparent"
 				android:contentDescription="Обновить"
-				android:background="@android:color/transparent" 
-				android:src="@android:drawable/ic_menu_rotate" />
+				android:src="@drawable/media3_icon_sync" />
 				
 		</androidx.appcompat.widget.Toolbar>
 		

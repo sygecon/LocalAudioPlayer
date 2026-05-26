@@ -108,8 +108,7 @@ public class AudioPlaybackService extends MediaSessionService
         try {
             if (PhoneCallReceiver != null) {
                 unregisterReceiver(PhoneCallReceiver);
-                // Приемник успешно отменен
-                PhoneCallReceiver = null; // Очищаем ссылку
+                PhoneCallReceiver = null;
             }
         } catch (IllegalArgumentException e) {
             Log.e("MediaReceiver", "Receiver not registered", e);

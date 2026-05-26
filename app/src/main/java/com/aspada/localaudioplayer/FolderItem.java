@@ -89,11 +89,4 @@ public class FolderItem {
 //        }
 //        return count;
 //    }
-
-//    private static class Holder {
-//        private static final FolderItem HOLDER_INSTANCE = new FolderItem();
-//    }
-//    public static FolderItem getInstance() {
-//        return Holder.HOLDER_INSTANCE;
-//    }
 }

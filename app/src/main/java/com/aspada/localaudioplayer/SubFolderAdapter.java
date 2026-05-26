@@ -180,4 +180,8 @@ public class SubFolderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             notifyItemChanged(playingPosition);
         }
     }
+
+    public int getPlayingPosition() {
+        return playingPosition;
+    }
 }

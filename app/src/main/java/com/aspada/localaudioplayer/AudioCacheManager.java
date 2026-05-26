@@ -73,7 +73,6 @@ public class AudioCacheManager {
             try {
                 // Симулируем прогресс
                 callback.onScanProgress("Сканирование папок...");
-
                 List<FolderItem> folders = scanner.scanAndBuildTree();
 
                 // Сохраняем в кэш
@@ -103,7 +102,7 @@ public class AudioCacheManager {
         File cacheFile = getCacheFile();
         long cacheAge = System.currentTimeMillis() - cacheFile.lastModified();
 
-        // Если кэш старше 24 часов — невалиден
+        // Если кэш старше допустимого — невалиден
         if (cacheAge > CACHE_VALID_DURATION) {
             return false;
         }
@@ -187,7 +186,6 @@ public class AudioCacheManager {
         } catch (Exception e) {
             Log.e("Cache", "Непредвиденная ошибка: " + e.getMessage());
             // Удаляем поврежденный кэш
-
             if (! getCacheFile().delete()) return null;
             return null;
         }
