@@ -123,12 +123,17 @@ public class MainActivity extends AppCompatActivity {
                     mediaController.stop();
                 }
             }
+            if (isJournalShowing) hideJournal();
+
             forceRescan();
             showRootFolders();
         });
 
         // Btn Back
-        findViewById(R.id.btn_back).setOnClickListener(v -> goToPrevious());
+        findViewById(R.id.btn_back).setOnClickListener(v -> {
+            if (isJournalShowing) hideJournal();
+            goToPrevious();
+        });
 
         // Журнал
         ImageButton btnJournal = findViewById(R.id.btn_journal);
@@ -136,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Btn Play Click
         findViewById(R.id.btnPlayPause).setOnClickListener(v -> {
+            if (isJournalShowing) hideJournal();
+
             if (mediaController != null) {
                 if (mediaController.isPlaying()) {
                     mediaController.pause();
@@ -156,6 +163,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Предыдущий трек
         findViewById(R.id.btnBackward).setOnClickListener(v -> {
+            if (isJournalShowing) hideJournal();
+
             if (mediaController != null) {
                 if (mediaController.hasPreviousMediaItem()) {
                     if (mpActiveIndex > 0) {
@@ -168,6 +177,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Следующий трек
         findViewById(R.id.btnForward).setOnClickListener(v -> {
+            if (isJournalShowing) hideJournal();
+
             if (mediaController != null) {
                 if (mediaController.hasNextMediaItem()) {
                     if (mpActiveIndex + 1 < mediaController.getMediaItemCount()) {
@@ -188,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
                         mediaController.stop();
                     }
                 }
+                if (isJournalShowing) hideJournal();
 
                 if (! curFolderIsRoot) {
                     goToPrevious();
@@ -215,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 isUserSeeking = true;
+                if (isJournalShowing) hideJournal();
             }
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -392,6 +405,7 @@ public class MainActivity extends AppCompatActivity {
         currentAdapter = new SubFolderAdapter(folder, new SubFolderAdapter.OnItemClickListener() {
             @Override
             public void onFolderClick(FolderItem subFolder) {
+                if (isJournalShowing) hideJournal();
                 showSubFolder(subFolder);
             }
 
@@ -406,6 +420,7 @@ public class MainActivity extends AppCompatActivity {
              */
             @Override
             public void onAudioClick(FolderItem.AudioItem audio, int position, List<FolderItem.AudioItem> allAudio) {
+                if (isJournalShowing) hideJournal();
                 if (currentAdapter == null) return;
                 if (position < 0) return;
                 if (mediaController == null) return;
@@ -818,6 +833,7 @@ public class MainActivity extends AppCompatActivity {
         // Восстанавливаем предыдущий вид
         if (currentAdapter != null) {
             recyclerView.setAdapter(currentAdapter);
+            scrollToActiveItem();
         } else {
             showRootFolders();
         }
