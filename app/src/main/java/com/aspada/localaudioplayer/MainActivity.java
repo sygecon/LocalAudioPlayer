@@ -820,6 +820,7 @@ public class MainActivity extends AppCompatActivity {
             navigateToFolderByPath(folderPath);
             // После перехода автоматически возвращаемся к основному режиму
             hideJournal();
+            UpdateUI();
         });
         recyclerView.setAdapter(journalAdapter);
         // Меняем иконку кнопки (если нужно)
@@ -863,8 +864,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void scrollToActiveItem() {
         if (!(recyclerView.getAdapter() instanceof SubFolderAdapter)) return;
+
         SubFolderAdapter adapter = (SubFolderAdapter) recyclerView.getAdapter();
         int position = adapter.getPlayingPosition();
+
         if (position != RecyclerView.NO_POSITION) {
             // Плавная прокрутка с небольшим смещением, чтобы элемент был в верхней трети экрана
             LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
