@@ -15,15 +15,18 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
+import androidx.media3.common.Timeline;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -611,14 +614,14 @@ public class MainActivity extends AppCompatActivity {
     private void UpdateUIRange() {
         if (mpActiveIndex == -1) return;
         if (mediaController == null) return;
-        long duration = mediaController.getDuration();
+        long durationMs = mediaController.getDuration();
 
-        if (duration > 0) {
+        if (durationMs != C.TIME_UNSET) {
             TextView totalTime = findViewById(R.id.totalTime);
-            totalTime.setText(AppUtils.formatDuration(duration));
+            totalTime.setText(AppUtils.formatDuration(durationMs));
 
             SeekBar seekBar = findViewById(R.id.rangeSeekBar);
-            seekBar.setMax((int) duration);
+            seekBar.setMax((int) durationMs);
         }
     }
 
@@ -626,8 +629,6 @@ public class MainActivity extends AppCompatActivity {
         String txt = "Трек " + (mpActiveIndex + 1) + " из " + mpTrackCount;
         TextView statTrack = findViewById(R.id.trackNumber);
         statTrack.setText(txt);
-
-        UpdateUIRange();
     }
 
     /**
@@ -674,8 +675,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-//            @Override
-//            public void onPlaybackStateChanged(int state) {
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                // Как только плеер готов к воспроизведению
+                if (state == Player.STATE_READY) {
+                    UpdateUIRange();
+                }
 //                      Player.STATE_IDLE , Player.STATE_BUFFERING , Player.STATE_READY
 //                if (state == Player.STATE_ENDED) {
 //                    mpPosition = 0;
@@ -687,7 +692,15 @@ public class MainActivity extends AppCompatActivity {
                 // Срабатывает именно при player.stop()
 //                else if (state == Player.STATE_IDLE) {
 //                }
-//            }
+            }
+
+            @Override
+            public void onTimelineChanged(@NonNull Timeline timeline, int reason) {
+                // Срабатывает, как только источник обновляет метаданные
+                if (reason == Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE) {
+                    UpdateUIRange();
+                }
+            }
         });
     }
 
@@ -820,7 +833,6 @@ public class MainActivity extends AppCompatActivity {
             navigateToFolderByPath(folderPath);
             // После перехода автоматически возвращаемся к основному режиму
             hideJournal();
-            UpdateUI();
         });
         recyclerView.setAdapter(journalAdapter);
         // Меняем иконку кнопки (если нужно)
