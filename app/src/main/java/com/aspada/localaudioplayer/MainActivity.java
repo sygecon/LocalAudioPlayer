@@ -431,10 +431,12 @@ public class MainActivity extends AppCompatActivity {
                 mpActiveIndex = position;
                 mpPosition    = 0;
                 int index     = 0;
+                long duration = 0;
 
                 for (FolderItem.AudioItem item: allAudio) {
                     if (item.path.equalsIgnoreCase(audio.path)) {
                         mpActiveIndex = index;
+                        duration = item.duration;
                         break;
                     }
                     index++;
@@ -445,6 +447,9 @@ public class MainActivity extends AppCompatActivity {
                 if (!curFolderPath.isEmpty() && mpActiveIndex > -1) {
                     updateAdapterPlayingPosition(mpActiveIndex);
 
+                    if (duration > 0) {
+                        UpdateUIDuration(duration);
+                    }
                     if (stateManager != null) {
                         stateManager.saveState(curFolderPath, mpActiveIndex, mpPosition);
                     }
@@ -611,17 +616,21 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    private void UpdateUIDuration(long durationMs) {
+        TextView totalTime = findViewById(R.id.totalTime);
+        totalTime.setText(AppUtils.formatDuration(durationMs));
+
+        SeekBar seekBar = findViewById(R.id.rangeSeekBar);
+        seekBar.setMax((int) durationMs);
+    }
+
     private void UpdateUIRange() {
         if (mpActiveIndex == -1) return;
         if (mediaController == null) return;
         long durationMs = mediaController.getDuration();
 
         if (durationMs != C.TIME_UNSET) {
-            TextView totalTime = findViewById(R.id.totalTime);
-            totalTime.setText(AppUtils.formatDuration(durationMs));
-
-            SeekBar seekBar = findViewById(R.id.rangeSeekBar);
-            seekBar.setMax((int) durationMs);
+            UpdateUIDuration(durationMs);
         }
     }
 
