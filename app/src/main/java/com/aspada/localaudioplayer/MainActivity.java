@@ -743,6 +743,7 @@ public class MainActivity extends AppCompatActivity {
             UpdateUI();
             // Прокручиваем к активному элементу
             scrollToActiveItem();
+            UpdateUIRange();
         }
     }
 
